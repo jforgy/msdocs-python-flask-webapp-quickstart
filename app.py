@@ -1,5 +1,6 @@
 import os
 import requests
+import json
 from datetime import datetime
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for)
@@ -24,10 +25,15 @@ def home():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
-@app.route('/data/')
+@app.route('/data')
 def returnData():
-    return getData()
-
+    data = getData()
+    response = app.response_class(
+        response = json.dumps(data),
+        status = 200,
+        mimetype='application/json'
+        )
+    return response
 
 def getData():
     """Renders the contact page."""
