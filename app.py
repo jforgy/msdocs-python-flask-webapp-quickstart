@@ -114,7 +114,7 @@ def getData():
                             devig = requests.get(devigurl)
                             devig = devig.json()
                             if "Final" in devig:
-                                if devig["Final"]["EV_Percentage"] > 0:
+                                #if devig["Final"]["EV_Percentage"] > 0:
                                     #add to game
 
                                     #format odds to have a "+" at the start if they don't start with "-"
@@ -135,8 +135,15 @@ def getData():
                                     #print(devig["Final"]["Kelly_Full"])
                         #print(q["name"]["value"])
                         #print(q["americanOdds"])
-                    if(len(game["Lines"]) > 0):
+                    #if(len(game["Lines"]) > 0):
+                        #games.append(game)
+                    addGame = "false"
+                    for line in game["Lines"]:
+                        if '-' not in line["EVPercentage"]:
+                            addGame="true"
+                    if addGame == "true":
                         games.append(game)
+                            
     print(games)
     return games
 
