@@ -1,12 +1,12 @@
-"""
-Routes and views for the flask application.
-"""
-
-from datetime import datetime
-from flask import render_template
-from FlaskWebProject2 import app
+import os
 import requests
 import json
+from datetime import datetime
+from flask import (Flask, redirect, render_template, request,
+                   send_from_directory, url_for)
+
+app = Flask(__name__)
+
 
 @app.route('/')
 @app.route('/home')
@@ -229,3 +229,6 @@ def getPitcherProps():
                     games.append(game)
 
     return games
+
+if __name__ == '__main__':
+   app.run(debug=False,host='0.0.0.0')
