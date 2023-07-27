@@ -1,12 +1,12 @@
-import os
+"""
+Routes and views for the flask application.
+"""
+
+from datetime import datetime
+from flask import render_template
+from FlaskWebProject2 import app
 import requests
 import json
-from datetime import datetime
-from flask import (Flask, redirect, render_template, request,
-                   send_from_directory, url_for)
-
-app = Flask(__name__)
-
 
 @app.route('/')
 @app.route('/home')
@@ -21,12 +21,20 @@ def home():
         year=datetime.now().year,
     )
 
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+@app.route('/pitcherprops')
+def pitcherprops():
+    """Renders the home page."""
+
+    games = getPitcherProps()
+    return render_template(
+        'PitcherProps.html',
+        title='Home Page',
+        games = games,
+        year=datetime.now().year,
+    )
+
 @app.route('/data')
-def returnData():
+def data():
     data = getData()
     response = app.response_class(
         response = json.dumps(data),
@@ -34,6 +42,7 @@ def returnData():
         mimetype='application/json'
         )
     return response
+
 
 def getData():
     """Renders the contact page."""
@@ -51,14 +60,20 @@ def getData():
     for i in mgm_all["fixtures"]:
         id = i["id"]
         if len(i["participants"]) > 0:
-            mgmGameStart = datetime.strptime(i["startDate"], '%Y-%m-%dT%H:%M:%SZ').hour
+            #print(i["startDate"])
+            #2023-07-25T22:40:00Z
+            mgmGameStart = datetime.strptime(i["startDate"], '%Y-%m-%dT%H:%M:%SZ')
             away = i["participants"][0]["name"]["short"]
-            #match away team to one competitor from fd_all[attachments][events] and match start hour
+            #print(away)
+            #match away team to one competitor from fd_all[attachments][events]
             for fd in fd_all["attachments"]["events"]:
-                fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ').hour
-                if (away in fd_all["attachments"]["events"][fd]["name"]) and (mgmGameStart == fdGameStart):
+                fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ')
+                if (away in fd_all["attachments"]["events"][fd]["name"]) and (mgmGameStart.day == fdGameStart.day) and (mgmGameStart.hour == fdGameStart.hour):
+                    #print("FD: {}".format(fd_all["attachments"]["events"][fd]["openDate"]))
+                    #print(away)
                     #create game, may be scrapped later if no lines are added
                     game = {"Name": fd_all["attachments"]["events"][fd]["name"], "Lines": list(), "AwayPitcher": "", "HomePitcher": ""}
+                    #print(fd_all["attachments"]["events"][fd]["name"])
                     fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
                     #break
             fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
@@ -125,5 +140,92 @@ def getData():
     print(games)
     return games
 
-if __name__ == '__main__':
-   app.run(debug=False,host='0.0.0.0')
+def getPitcherProps():
+    games = list()
+    fd_all_url = "https://sbapi.il.sportsbook.fanduel.com/api/content-managed-page?page=CUSTOM&customPageId=mlb&_ak=FhMFpcPWXMeyZxOx&timezone=America%2FChicago"
+    mgm_all_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixtures?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&fixtureTypes=Standard&state=Latest&offerMapping=MainMarkets&sortBy=FixtureStage&competitionIds=75&virtualCompetitionIds="
+    mgm_headers = {
+        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+        }
+    mgm_all = requests.get(mgm_all_url, headers = mgm_headers)
+    mgm_all = mgm_all.json()
+    fd_all = requests.get(fd_all_url)
+    fd_all = fd_all.json()
+    for i in mgm_all["fixtures"]:
+        id = i["id"]
+        if len(i["participants"]) > 0:
+            #print(i["startDate"])
+            #2023-07-25T22:40:00Z
+            mgmGameStart = datetime.strptime(i["startDate"], '%Y-%m-%dT%H:%M:%SZ')
+            away = i["participants"][0]["name"]["short"]
+            for fd in fd_all["attachments"]["events"]:
+                fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ')
+                if (away in fd_all["attachments"]["events"][fd]["name"]) and (mgmGameStart.day == fdGameStart.day) and (mgmGameStart.hour == fdGameStart.hour):
+                    #print("FD: {}".format(fd_all["attachments"]["events"][fd]["openDate"]))
+                    #print(away)
+                    #create game, may be scrapped later if no lines are added
+                    #print(fd_all["attachments"]["events"][fd]["name"])
+                    fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
+                    #break
+            fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
+            mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true".format(id)
+            mgm = requests.get(mgm_one_url, headers = mgm_headers)
+            fd = requests.get(fd_one_url)
+            fd=fd.json()        
+            fd = fd["attachments"]["markets"]
+            data =[]            
+            for i in fd:
+                if "Alt Strikeouts" in fd[i]["marketName"]:
+                    data.append(fd[i])
+        mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true".format(id)
+        mgm = requests.get(mgm_one_url, headers = mgm_headers)
+        mgm=mgm.json()
+        for i in mgm["fixture"]["games"]:
+            if len(data) == 2:
+                game = {"Name": mgm["fixture"]["name"]["value"], "Lines": list(), "AwayPitcher": "", "HomePitcher": ""}                                             
+                awayPitcher = data[0]["marketName"].split("-")[0]
+                homePitcher = data[1]["marketName"].split("-")[0]
+                game["awayPitcher"] = awayPitcher
+                game["homePitcher"] = homePitcher
+                if "Starting Pitcher Props" in i["name"]["value"] and awayPitcher in i["name"]["value"]:
+                    print(i["name"]["value"])
+                    for p in i["results"]:
+                        if "Strikeouts" in p["name"]["value"]:
+                            print("MGM - {}: {}".format(p["name"]["value"], p["americanOdds"]))
+                            str = "{}{}+".format(awayPitcher, p["attr"])
+                            for r in data[0]["runners"]:
+                                #rint(r)
+                                #print(str)
+                                name = r["runnerName"]
+                                #print(r["runnerName"])
+                                if str in name:
+                                    devigurl = "https://api.crazyninjaodds.com/api/devigger/v1/sportsbook_devigger.aspx?api=open&legodds={}/7%&finalodds={}&devigmethod=4&args=ev_p,kelly".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
+                                    devig = requests.get(devigurl)
+                                    devig = devig.json()
+                                    print("FD - {}: {}".format(r["runnerName"], r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]))
+                                    DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25&FinalOdds={}".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
+                                    Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink}
+                                    game["Lines"].append(Line)
+                if "Starting Pitcher Props" in i["name"]["value"] and homePitcher in i["name"]["value"]:
+                    print(i["name"]["value"])
+                    for p in i["results"]:
+                        if "Strikeouts" in p["name"]["value"]:
+                            print("MGM - {}: {}".format(p["name"]["value"], p["americanOdds"]))
+                            str = "{}{}+".format(homePitcher, p["attr"])
+                            for r in data[1]["runners"]:
+                                #rint(r)
+                                #print(str)
+                                name = r["runnerName"]
+                                #print(r["runnerName"])
+                                if str in name:
+                                    devigurl = "https://api.crazyninjaodds.com/api/devigger/v1/sportsbook_devigger.aspx?api=open&legodds={}/7%&finalodds={}&devigmethod=4&args=ev_p,kelly".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
+                                    devig = requests.get(devigurl)
+                                    devig = devig.json()
+                                    print("FD - {}: {}".format(r["runnerName"], r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]))
+                                    DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25&FinalOdds={}".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
+                                    Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink}
+                                    game["Lines"].append(Line)
+                if(len(game["Lines"]) > 0):
+                    games.append(game)
+
+    return games

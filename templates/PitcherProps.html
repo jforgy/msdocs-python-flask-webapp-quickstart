@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% for game in games %}
+<div class="row">
+    <div class="col-md-12">
+        <h3>
+            {{game.Name}}
+        </h3>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <td>
+                        Bet
+                    </td>
+                    <td>
+                        MGM Odds
+                    </td>
+                    <td>
+                        Fanduel Odds
+                    </td>
+                    <td>
+                        EV%
+                    </td>
+                    <td>
+                        Full Kelly Stake
+                    </td>
+                    <td>
+                        Devig Link
+                    </td>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in game["Lines"] %}
+                <tr>
+                    <td>
+                        {{line["Name"]}}
+                    </td>
+                    <td>
+                        {{line["MGMOdds"]}}
+                    </td>
+                    <td>
+                        {{line["FanduelOdds"]}}
+                    </td>
+                    <td>
+                        {{line["EVPercentage"]}}
+                    </td>
+                    <td>
+                        {{line["FullKelly"]}}
+                    </td>
+                    <td>
+                        <a href="{{line["DevigLink"]}}" target="_blank">Link</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+        {% endfor %}
+
+        {% endblock %}
