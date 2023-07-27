@@ -24,6 +24,10 @@ def home():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+@app.route('/data/')
+def returnData():
+    return getData()
+
 
 def getData():
     """Renders the contact page."""
@@ -41,16 +45,16 @@ def getData():
     for i in mgm_all["fixtures"]:
         id = i["id"]
         if len(i["participants"]) > 0:
+            mgmGameStart = datetime.strptime(i["startDate"], '%Y-%m-%dT%H:%M:%SZ').hour
             away = i["participants"][0]["name"]["short"]
-            #match away team to one competitor from fd_all[attachments][events]
+            #match away team to one competitor from fd_all[attachments][events] and match start hour
             for fd in fd_all["attachments"]["events"]:
-                if away in fd_all["attachments"]["events"][fd]["name"]:
-                    #print(away)
+                fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ').hour
+                if (away in fd_all["attachments"]["events"][fd]["name"]) and (mgmGameStart == fdGameStart):
                     #create game, may be scrapped later if no lines are added
                     game = {"Name": fd_all["attachments"]["events"][fd]["name"], "Lines": list(), "AwayPitcher": "", "HomePitcher": ""}
-                    print(fd_all["attachments"]["events"][fd]["name"])
                     fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
-                    break
+                    #break
             fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
             mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true".format(id)
             mgm = requests.get(mgm_one_url, headers = mgm_headers)
