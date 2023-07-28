@@ -277,6 +277,20 @@ def getPitcherProps():
                     games.append(game)
 
     return games
+@app.route('/savesettings', methods = ['GET', 'POST'])
+def setcookie():    
+      # Initializing response object
+      bankroll = request.form['Bankroll']
+      kelly = request.form['Kelly']
+      resp = make_response('Settings have been updated') 
+      resp.set_cookie('KellyMultiplier', kelly)
+      resp.set_cookie('Bankroll', bankroll)
+      return resp
 
+@app.route('/getcookie')
+def getcookie():
+    k = request.cookies.get('KellyMultiplier')
+    b = request.cookies.get('Bankroll')
+    return 'Multiplier: '+ k + ' Bankroll: ' + b
 if __name__ == '__main__':
    app.run(debug=False,host='0.0.0.0')
