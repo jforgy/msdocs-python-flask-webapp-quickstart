@@ -3,35 +3,56 @@ import requests
 import json
 from datetime import datetime
 from flask import (Flask, redirect, render_template, request,
-                   send_from_directory, url_for)
+                   send_from_directory, url_for, make_response)
 
 app = Flask(__name__)
 
 
 @app.route('/')
+@app.route('/')
 @app.route('/home')
 def home():
     """Renders the home page."""
-
+    if "Bankroll" in request.cookies:
+        bankroll = request.cookies.get('Bankroll')
+    else:
+        bankroll = 1000
+    if "KellyMultiplier" in request.cookies:
+        kelly = request.cookies.get('KellyMultiplier')
+    else:
+        kelly = .25
     games = getData()
-    return render_template(
+    resp = make_response(render_template(
         'index.html',
         title='Home Page',
         games = games,
         year=datetime.now().year,
-    )
+        bankroll = bankroll,
+        kelly = kelly
+    ))
+    resp.set_cookie('Bankroll', bankroll)
+    resp.set_cookie('KellyMultiplier', kelly)
+    return resp
+
 
 @app.route('/pitcherprops')
 def pitcherprops():
     """Renders the home page."""
+    bankroll = request.cookies.get('Bankroll')
+    kelly = request.cookies.get('KellyMultiplier')
 
     games = getPitcherProps()
-    return render_template(
+    resp = make_response(render_template(
         'PitcherProps.html',
         title='Home Page',
         games = games,
         year=datetime.now().year,
-    )
+        bankroll = bankroll,
+        kelly = kelly
+    ))
+    resp.set_cookie('Bankroll', bankroll)
+    resp.set_cookie('KellyMultiplier', kelly)
+    return resp
 
 @app.route('/data')
 def data():
@@ -124,8 +145,13 @@ def getData():
 
                                     #create CNM Devig link
                                     DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25%2c{}%2f7%25&FinalOdds={}".format(oddsOne,oddsTwo,finalOdds)
+                                    fullKelly = devig["Final"]["Kelly_Full"]
+                                    bankroll = request.cookies.get('Bankroll')
+                                    kelly = request.cookies.get('KellyMultiplier')
 
-                                    Line = {"Name": q["name"]["value"], "Odds": finalOdds, "AwayPitcherOdds": oddsOne, "HomePitcherOdds": oddsTwo, "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink}
+                                    betSize = int(bankroll) * .01 * float(kelly) * fullKelly
+                                    
+                                    Line = {"Name": q["name"]["value"], "Odds": finalOdds, "AwayPitcherOdds": oddsOne, "HomePitcherOdds": oddsTwo, "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "BetSize": '${:,.2f}'.format(betSize), "DevigLink": DevigLink}
                                     game["Lines"].append(Line)
 
                                     #"EV": devig["Final"]["EV_Percentage"], "Kelly": devig["Final"]["Kelly_Full"]
@@ -212,7 +238,12 @@ def getPitcherProps():
                                     print("FD - {}: {}".format(r["runnerName"], r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]))
                                     DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25&FinalOdds={}".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
                                     if "Final" in devig:
-                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink}
+                                        fullKelly = devig["Final"]["Kelly_Full"]
+                                        bankroll = request.cookies.get('Bankroll')
+                                        kelly = request.cookies.get('KellyMultiplier')
+
+                                        betSize = int(bankroll) * .01 * float(kelly) * fullKelly
+                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "BetSize": '${:,.2f}'.format(betSize), "DevigLink": DevigLink}
                                         game["Lines"].append(Line)
                 if "Starting Pitcher Props" in i["name"]["value"] and homePitcher in i["name"]["value"]:
                     print(i["name"]["value"])

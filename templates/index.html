@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 
 {% block content %}
+
+
 {% for game in games %}
 <div class="row">
     <div class="col-md-12">
@@ -53,7 +55,7 @@
                         {{line["EVPercentage"]}}
                     </td>
                     <td>
-                        {{line["FullKelly"]}}
+                        {{line["BetSize"]}}
                     </td>
                     <td>
                         <a href="{{line["DevigLink"]}}" target="_blank">Link</a>
@@ -62,7 +64,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        </div>
+    </div>
 </div>
         {% endfor %}
 

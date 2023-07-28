@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} - My Flask Application</title>
+    <title>Pitcher's Duel</title>
     <link rel="stylesheet" type="text/css" href="/static/content/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/static/content/site.css" />
     <script src="/static/scripts/modernizr-2.6.2.js"></script>
@@ -30,6 +30,16 @@
     </div>
 
     <div class="container body-content">
+        {{Poop}}
+        <div class="row" style="margin-top:30px;">
+            <div class="col-md-2">Kelly Multiplier: </div><div class="col-md-4"><input type='number' id="kelly" value="{{kelly}}" /></div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">Bankroll: </div><div class="col-md-4"><input type='number' id="bankroll" value="{{bankroll}}" /></div>
+        </div>
+        <div class="row">
+            <div class="col-md-2"><input type='submit' value='Save' onclick="saveSettings()" /></div><div class="col-md-4" style="display:none;" id="saved">Settings have been saved. Refresh to see updated bet sizes</div>
+        </div>
         {% block content %}{% endblock %}
         <hr />
         <footer>
@@ -40,6 +50,20 @@
     <script src="/static/scripts/bootstrap.js"></script>
     <script src="/static/scripts/respond.js"></script>
     {% block scripts %}{% endblock %}
-
+    <script>
+        function saveSettings() {
+            var bankroll = $('#bankroll').val()
+            var kelly = $('#kelly').val()
+            //alert(bankroll + " " + kelly)
+            $.ajax({
+                type: 'POST',
+                url: '/savesettings',
+                data: { 'Kelly': kelly, 'Bankroll': bankroll },
+                success: function (resp) {
+                    $("#saved").show().fadeOut(5000)
+                }
+            });
+        }
+    </script>
 </body>
 </html>
