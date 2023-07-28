@@ -13,14 +13,12 @@ app = Flask(__name__)
 @app.route('/home')
 def home():
     """Renders the home page."""
-    if "Bankroll" in request.cookies:
-        bankroll = request.cookies.get('Bankroll')
-    else:
-        bankroll = 1000
-    if "KellyMultiplier" in request.cookies:
-        kelly = request.cookies.get('KellyMultiplier')
-    else:
-        kelly = .25
+    bankroll = request.cookies.get('Bankroll')
+    kelly = request.cookies.get('KellyMultiplier')
+    if bankroll is None:
+        bankroll = '1000'
+    if kelly is None:
+        kelly = '.25'
     games = getData()
     resp = make_response(render_template(
         'index.html',
@@ -40,6 +38,10 @@ def pitcherprops():
     """Renders the home page."""
     bankroll = request.cookies.get('Bankroll')
     kelly = request.cookies.get('KellyMultiplier')
+    if bankroll is None:
+        bankroll = '1000'
+    if kelly is None:
+        kelly = '.25'
 
     games = getPitcherProps()
     resp = make_response(render_template(
@@ -148,7 +150,10 @@ def getData():
                                     fullKelly = devig["Final"]["Kelly_Full"]
                                     bankroll = request.cookies.get('Bankroll')
                                     kelly = request.cookies.get('KellyMultiplier')
-
+                                    if bankroll is None:
+                                        bankroll = 1000
+                                    if kelly is None:
+                                        kelly = .25
                                     betSize = int(bankroll) * .01 * float(kelly) * fullKelly
                                     
                                     Line = {"Name": q["name"]["value"], "Odds": finalOdds, "AwayPitcherOdds": oddsOne, "HomePitcherOdds": oddsTwo, "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "BetSize": '${:,.2f}'.format(betSize), "DevigLink": DevigLink}
@@ -241,7 +246,10 @@ def getPitcherProps():
                                         fullKelly = devig["Final"]["Kelly_Full"]
                                         bankroll = request.cookies.get('Bankroll')
                                         kelly = request.cookies.get('KellyMultiplier')
-
+                                        if bankroll is None:
+                                            bankroll = 1000
+                                        if kelly is None:
+                                            kelly = .25
                                         betSize = int(bankroll) * .01 * float(kelly) * fullKelly
                                         Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "BetSize": '${:,.2f}'.format(betSize), "DevigLink": DevigLink}
                                         game["Lines"].append(Line)
