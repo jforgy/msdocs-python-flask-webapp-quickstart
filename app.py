@@ -211,8 +211,9 @@ def getPitcherProps():
                                     devig = devig.json()
                                     print("FD - {}: {}".format(r["runnerName"], r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]))
                                     DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25&FinalOdds={}".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
-                                    Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink}
-                                    game["Lines"].append(Line)
+                                    if "Final" in devig:
+                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink}
+                                        game["Lines"].append(Line)
                 if "Starting Pitcher Props" in i["name"]["value"] and homePitcher in i["name"]["value"]:
                     print(i["name"]["value"])
                     for p in i["results"]:
@@ -230,8 +231,9 @@ def getPitcherProps():
                                     devig = devig.json()
                                     print("FD - {}: {}".format(r["runnerName"], r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]))
                                     DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25&FinalOdds={}".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
-                                    Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink}
-                                    game["Lines"].append(Line)
+                                    if "Final" in devig:
+                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink}
+                                        game["Lines"].append(Line)
                 if(len(game["Lines"]) > 0):
                     games.append(game)
 
