@@ -271,7 +271,15 @@ def getPitcherProps():
                                     print("FD - {}: {}".format(r["runnerName"], r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]))
                                     DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25&FinalOdds={}".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
                                     if "Final" in devig:
-                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink}
+                                        fullKelly = devig["Final"]["Kelly_Full"]
+                                        bankroll = request.cookies.get('Bankroll')
+                                        kelly = request.cookies.get('KellyMultiplier')
+                                        if bankroll is None:
+                                            bankroll = 1000
+                                        if kelly is None:
+                                            kelly = .25
+                                        betSize = int(bankroll) * .01 * float(kelly) * fullKelly
+                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "BetSize": '${:,.2f}'.format(betSize), "DevigLink": DevigLink}
                                         game["Lines"].append(Line)
                 if(len(game["Lines"]) > 0):
                     games.append(game)
