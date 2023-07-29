@@ -129,9 +129,9 @@ def getData():
                             if "7+" in q["name"]["value"]:
                                 oddsOne = str(data[0]["runners"][4]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
                                 oddsTwo = str(data[1]["runners"][4]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
-                            if "8+" in q["name"]["value"]:
-                                oddsOne = str(data[0]["runners"][5]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
-                                oddsTwo = str(data[1]["runners"][5]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
+                            #if "8+" in q["name"]["value"]:
+                                #oddsOne = str(data[0]["runners"][5]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
+                                #oddsTwo = str(data[1]["runners"][5]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
                             finalOdds = str(q["americanOdds"])
                             devigurl = "https://api.crazyninjaodds.com/api/devigger/v1/sportsbook_devigger.aspx?api=open&legodds={}/7%,{}/7%&finalodds={}&devigmethod=4&args=ev_p,kelly".format(oddsOne, oddsTwo, finalOdds)
                             devig = requests.get(devigurl)
