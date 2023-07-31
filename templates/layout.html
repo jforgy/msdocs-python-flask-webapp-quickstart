@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitcher's Duel</title>
+    <title>Pitcher's Duels</title>
     <link rel="stylesheet" type="text/css" href="/static/content/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/static/content/site.css" />
     <script src="/static/scripts/modernizr-2.6.2.js"></script>
@@ -32,13 +32,13 @@
     <div class="container body-content">
         {{Poop}}
         <div class="row" style="margin-top:30px;">
-            <div class="col-md-2">Kelly Multiplier: </div><div class="col-md-4"><input type='number' id="kelly" value="{{kelly}}" /></div>
+            <div class="col-md-2">Kelly Multiplier: </div><div class="col-md-4"><input onchange="UpdateBetSizes()" type='number' id="kelly" value="{{kelly}}" /></div>
         </div>
         <div class="row">
-            <div class="col-md-2">Bankroll: </div><div class="col-md-4"><input type='number' id="bankroll" value="{{bankroll}}" /></div>
+            <div class="col-md-2">Bankroll: </div><div class="col-md-4"><input onchange="UpdateBetSizes()" type='number' id="bankroll" value="{{bankroll}}" /></div>
         </div>
         <div class="row">
-            <div class="col-md-2"><input type='submit' value='Save' onclick="saveSettings()" /></div><div class="col-md-4" style="display:none;" id="saved">Settings have been saved. Refresh to see updated bet sizes</div>
+            <div class="col-md-2"><input type='submit' value='Save' onclick="saveSettings()" /></div><div class="col-md-4" style="display:none;" id="saved">Settings have been saved.</div>
         </div>
         {% block content %}{% endblock %}
         <hr />
@@ -63,6 +63,23 @@
                     $("#saved").show().fadeOut(5000)
                 }
             });
+        }
+
+        function UpdateBetSizes() {
+            var allBetSizes = document.getElementsByClassName("BetSize");
+            for (var x = 0; x < allBetSizes.length; x++) {
+                //calculate new bet size
+                //get fk units
+                //var fkUnits = allBetSizes[x].data("fk");
+                var fk = parseFloat($(allBetSizes[x]).attr("data-fk"))
+                //alert(fkUnits)
+                var bankroll = parseFloat($('#bankroll').val())
+                var kelly = parseFloat($('#kelly').val())
+                //divide by 100, multiply by kelly and bankroll
+                var newSize = fk * bankroll * kelly / 100
+
+                $(allBetSizes[x]).text("$" + newSize.toFixed(2))
+            }
         }
     </script>
 </body>
