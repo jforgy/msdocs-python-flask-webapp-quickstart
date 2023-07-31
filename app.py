@@ -125,15 +125,15 @@ def getData():
                                     oddsOne = str(data[0]["runners"][2]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
                                     oddsTwo = str(data[1]["runners"][2]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
                             if "6+" in q["name"]["value"]:
-                                if len(data[0]["runners"]) > 3 and len(data[1]["runners"]) > 3):
+                                if len(data[0]["runners"]) > 3 and len(data[1]["runners"]) > 3:
                                     oddsOne = str(data[0]["runners"][3]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
                                     oddsTwo = str(data[1]["runners"][3]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
                             if "7+" in q["name"]["value"]:
-                                if len(data[0]["runners"]) > 4 and len(data[1]["runners"]) > 4):
+                                if len(data[0]["runners"]) > 4 and len(data[1]["runners"]) > 4:
                                     oddsOne = str(data[0]["runners"][4]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
                                     oddsTwo = str(data[1]["runners"][4]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
                             if "8+" in q["name"]["value"]:
-                                if len(data[0]["runners"]) > 5 and len(data[1]["runners"]) > 5):
+                                if len(data[0]["runners"]) > 5 and len(data[1]["runners"]) > 5:
                                     oddsOne = str(data[0]["runners"][5]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
                                     oddsTwo = str(data[1]["runners"][5]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
                             finalOdds = str(q["americanOdds"])
