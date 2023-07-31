@@ -28,8 +28,8 @@ def home():
         bankroll = bankroll,
         kelly = kelly
     ))
-    resp.set_cookie('Bankroll', bankroll)
-    resp.set_cookie('KellyMultiplier', kelly)
+    resp.set_cookie('Bankroll', bankroll, max_age=999999999)
+    resp.set_cookie('KellyMultiplier', kelly, max_age=999999999)
     return resp
 
 
@@ -52,8 +52,8 @@ def pitcherprops():
         bankroll = bankroll,
         kelly = kelly
     ))
-    resp.set_cookie('Bankroll', bankroll)
-    resp.set_cookie('KellyMultiplier', kelly)
+    resp.set_cookie('Bankroll', bankroll, max_age=999999999)
+    resp.set_cookie('KellyMultiplier', kelly, max_age=999999999)
     return resp
 
 @app.route('/data')
@@ -295,8 +295,8 @@ def setcookie():
       bankroll = request.form['Bankroll']
       kelly = request.form['Kelly']
       resp = make_response('Settings have been updated') 
-      resp.set_cookie('KellyMultiplier', kelly)
-      resp.set_cookie('Bankroll', bankroll)
+      resp.set_cookie('KellyMultiplier', kelly, max_age=999999999)
+      resp.set_cookie('Bankroll', bankroll, max_age=999999999)
       return resp
 
 @app.route('/getcookie')
