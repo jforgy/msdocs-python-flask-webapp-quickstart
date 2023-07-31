@@ -283,7 +283,8 @@ def getPitcherProps():
                                         if kelly is None:
                                             kelly = .25
                                         betSize = int(bankroll) * .01 * float(kelly) * fullKelly
-                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink, "BetSize": betSize}                                        game["Lines"].append(Line)
+                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink, "BetSize": betSize}                                        
+                                        game["Lines"].append(Line)
                 if(len(game["Lines"]) > 0):
                     games.append(game)
 
