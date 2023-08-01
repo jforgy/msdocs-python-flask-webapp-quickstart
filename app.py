@@ -255,7 +255,7 @@ def getPitcherProps():
                                         if kelly is None:
                                             kelly = .25
                                         betSize = int(bankroll) * .01 * float(kelly) * fullKelly
-                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink, '${:,.2f}'.format(betSize)}    
+                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink, "BetSize": '${:,.2f}'.format(betSize)}    
                                         game["Lines"].append(Line)
                 if "Starting Pitcher Props" in i["name"]["value"] and homePitcher in i["name"]["value"]:
                     print(i["name"]["value"])
@@ -283,7 +283,7 @@ def getPitcherProps():
                                         if kelly is None:
                                             kelly = .25
                                         betSize = int(bankroll) * .01 * float(kelly) * fullKelly
-                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink, '${:,.2f}'.format(betSize)}                                        
+                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink, "BetSize": '${:,.2f}'.format(betSize)}                                        
                                         game["Lines"].append(Line)
                 if(len(game["Lines"]) > 0):
                     games.append(game)
