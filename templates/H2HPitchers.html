@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<hr />
+<div class="row">
+    <a href="http://crazyninjamike.com/public/sportsbooks/sportsbook_combo_breaker.aspx" target="_blank">Combo Breaker Link</a>
+</div>
+<div class="row">
+    <a href="http://crazyninjamike.com/public/sportsbooks/sportsbook_devigger.aspx" target="_blank">Devigger Link</a>
+</div>
+<div class="row">
+    Instructions
+    <ol>
+        <li>
+            Copy from the textarea next to a game
+        </li>
+        <li>
+            Paste in to the combo breaker (link above)
+        </li>
+        <li>
+            Check the 'Head2Head' checkbox at the bottom of the form
+        </li>
+        <li>
+            Click Calculate to get the fair odds for the Away pitcher ('Flip Player Positions' at the bottom of the form will get fair odds for the home pitcher). Make sure to check all three methods (top of the form)
+        </li>
+        <li>
+            Take the worst case of the three methods
+        </li>
+        <li>
+            Open the devigger (link above)
+        </li>
+        <li>
+            Use the odds from step 5 as the Leg Odds
+        </li>
+        <li>
+            Use the relevant Pitcher's MGM H2H odds as the Final Odds
+        </li>
+    </ol>
+</div>
+{% for game in games %}
+<div class="row">
+    <div class="col-md-6">
+        <strong>{{game.Name}}</strong>
+        <p>
+            {{game.AwayPitcher}} ({{game.AwayOdds}})
+        </p>
+        <p>
+            {{game.HomePitcher}} ({{game.HomeOdds}})
+        </p>
+    </div>
+    <div class="col-md-6">
+        <textarea>
+{{game.AwayPitcher}} - Alt Strikeouts
+{% for line in game.AwayFDAlts %}
+{{line.Label}}
+{{line.Odds}}
+{% endfor %}
+{{game.HomePitcher}} - Alt Strikeouts 
+{% for line in game.HomeFDAlts %}
+{{line.Label}}
+{{line.Odds}}
+{% endfor %}        
+        </textarea>
+    </div>
+</div>
+        {% endfor %}
+
+        {% endblock %}
