@@ -353,33 +353,34 @@ def getPitcherH2H():
             for i in fd:
                 if "Alt Strikeouts" in fd[i]["marketName"]:
                     data.append(fd[i])
-            mgm=mgm.json()
-            for i in mgm["linkedFixture"]["optionMarkets"]:
-                if (i["name"]["value"] == "Most Ks" and i["status"] != "Suspended"):
-                     #Options[2]
-                     #options[0].name.value
-                     #options[0].price.americanodds
-                     if len(data) == 2:
-                        HomeFDAlts = list()
-                        AwayFDAlts = list()
-                        awayPitcher = data[0]["marketName"].split("-")[0].rstrip()
-                        homePitcher = data[1]["marketName"].split("-")[0].rstrip()
-                        game["AwayPitcher"] = awayPitcher
-                        game["HomePitcher"] = homePitcher
-                        a = i["options"][0]["name"]["value"]
-                        if awayPitcher == i["options"][0]["name"]["value"]:
-                            game["AwayOdds"] = i["options"][0]["price"]["americanOdds"] if "-" in str(i["options"][0]["price"]["americanOdds"]) else "+{}".format(i["options"][0]["price"]["americanOdds"])
-                            game["HomeOdds"] = i["options"][1]["price"]["americanOdds"] if "-" in str(i["options"][1]["price"]["americanOdds"]) else "+{}".format(i["options"][1]["price"]["americanOdds"])
-                        else:
-                            game["AwayOdds"] = i["options"][1]["price"]["americanOdds"] if "-" in str(i["options"][1]["price"]["americanOdds"]) else "+{}".format(i["options"][1]["price"]["americanOdds"])
-                            game["HomeOdds"] = i["options"][0]["price"]["americanOdds"] if "-" in str(i["options"][0]["price"]["americanOdds"]) else "+{}".format(i["options"][0]["price"]["americanOdds"])
-                        for line in data[0]["runners"]:
-                            Line = { "Label": line["runnerName"], "Odds": line["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"] }
-                            game["AwayFDAlts"].append(Line)
-                        for line in data[1]["runners"]:                 
-                            Line = { "Label": line["runnerName"], "Odds": line["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"] }           
-                            game["HomeFDAlts"].append(Line)
-                        games.append(game)
+            mgm=mgm.json()            
+            if "linkedFixture" in mgm:
+                for i in mgm["linkedFixture"]["optionMarkets"]:
+                    if (i["name"]["value"] == "Most Ks" and i["status"] != "Suspended"):
+                         #Options[2]
+                         #options[0].name.value
+                         #options[0].price.americanodds
+                         if len(data) == 2:
+                            HomeFDAlts = list()
+                            AwayFDAlts = list()
+                            awayPitcher = data[0]["marketName"].split("-")[0].rstrip()
+                            homePitcher = data[1]["marketName"].split("-")[0].rstrip()
+                            game["AwayPitcher"] = awayPitcher
+                            game["HomePitcher"] = homePitcher
+                            a = i["options"][0]["name"]["value"]
+                            if awayPitcher == i["options"][0]["name"]["value"]:
+                                game["AwayOdds"] = i["options"][0]["price"]["americanOdds"] if "-" in str(i["options"][0]["price"]["americanOdds"]) else "+{}".format(i["options"][0]["price"]["americanOdds"])
+                                game["HomeOdds"] = i["options"][1]["price"]["americanOdds"] if "-" in str(i["options"][1]["price"]["americanOdds"]) else "+{}".format(i["options"][1]["price"]["americanOdds"])
+                            else:
+                                game["AwayOdds"] = i["options"][1]["price"]["americanOdds"] if "-" in str(i["options"][1]["price"]["americanOdds"]) else "+{}".format(i["options"][1]["price"]["americanOdds"])
+                                game["HomeOdds"] = i["options"][0]["price"]["americanOdds"] if "-" in str(i["options"][0]["price"]["americanOdds"]) else "+{}".format(i["options"][0]["price"]["americanOdds"])
+                            for line in data[0]["runners"]:
+                                Line = { "Label": line["runnerName"], "Odds": line["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"] }
+                                game["AwayFDAlts"].append(Line)
+                            for line in data[1]["runners"]:                 
+                                Line = { "Label": line["runnerName"], "Odds": line["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"] }           
+                                game["HomeFDAlts"].append(Line)
+                            games.append(game)
     return games
 
 @app.route('/savesettings', methods = ['GET', 'POST'])
