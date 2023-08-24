@@ -121,7 +121,7 @@ def getData():
                     game = {"Name": fd_all["attachments"]["events"][fd]["name"], "Lines": list(), "AwayPitcher": "", "HomePitcher": ""}
                     #print(fd_all["attachments"]["events"][fd]["name"])
                     fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
-                    #break
+                    break
             fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
             mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true".format(id)
             mgm = requests.get(mgm_one_url, headers = mgm_headers)
