@@ -114,12 +114,13 @@ def getData():
             #match away team to one competitor from fd_all[attachments][events]
             for fd in fd_all["attachments"]["events"]:
                 fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ')
+                print(away)
                 if (away in fd_all["attachments"]["events"][fd]["name"]) and (mgmGameStart.day == fdGameStart.day) and (mgmGameStart.hour == fdGameStart.hour):
-                    print("FD: {}".format(fd_all["attachments"]["events"][fd]["openDate"]))
-                    print(away)
+                    #print("FD: {}".format(fd_all["attachments"]["events"][fd]["openDate"]))
+                    #print(away)
                     #create game, may be scrapped later if no lines are added
                     game = {"Name": fd_all["attachments"]["events"][fd]["name"], "Lines": list(), "AwayPitcher": "", "HomePitcher": ""}
-                    print(fd_all["attachments"]["events"][fd]["name"])
+                    #print(fd_all["attachments"]["events"][fd]["name"])
                     fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
                     #break
             fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
