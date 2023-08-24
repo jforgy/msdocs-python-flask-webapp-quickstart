@@ -113,6 +113,7 @@ def getData():
             print(away)
             #match away team to one competitor from fd_all[attachments][events]
             for fd in fd_all["attachments"]["events"]:
+                fd_one_id = None
                 fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ')
                 #print(away)
                 if (away in fd_all["attachments"]["events"][fd]["name"]) and (mgmGameStart.day == fdGameStart.day) and (mgmGameStart.hour == fdGameStart.hour):
@@ -122,86 +123,87 @@ def getData():
                     game = {"Name": fd_all["attachments"]["events"][fd]["name"], "Lines": list(), "AwayPitcher": "", "HomePitcher": ""}
                     #print(fd_all["attachments"]["events"][fd]["name"])
                     fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
-                    #break
-            fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
-            mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true".format(id)
-            mgm = requests.get(mgm_one_url, headers = mgm_headers)
-            fd = requests.get(fd_one_url)
-            fd=fd.json()        
-            fd = fd["attachments"]["markets"]
-            data =[]
-            for i in fd:
-                if "Alt Strikeouts" in fd[i]["marketName"]:
-                    data.append(fd[i])
-            mgm=mgm.json()
-            for i in mgm["fixture"]["games"]:
-                if i["name"]["value"] == "Pitcher's Duel":
-                    mgm_results = i["results"]
-                    for q in mgm_results:
-                        #print(len(data))
-                        if len(data) == 2:                            
-                            game["AwayPitcher"] = data[0]["marketName"].split("-")[0]
-                            game["HomePitcher"] = data[1]["marketName"].split("-")[0]
-                            oddsOne = 0
-                            oddsTwo = 0
-                            if "5+" in q["name"]["value"]:
-                                if len(data[0]["runners"]) > 2 and len(data[1]["runners"]) > 2:
-                                    oddsOne = str(data[0]["runners"][2]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
-                                    oddsTwo = str(data[1]["runners"][2]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
-                            if "6+" in q["name"]["value"]:
-                                if len(data[0]["runners"]) > 3 and len(data[1]["runners"]) > 3:
-                                    oddsOne = str(data[0]["runners"][3]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
-                                    oddsTwo = str(data[1]["runners"][3]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
-                            if "7+" in q["name"]["value"]:
-                                if len(data[0]["runners"]) > 4 and len(data[1]["runners"]) > 4:
-                                    oddsOne = str(data[0]["runners"][4]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
-                                    oddsTwo = str(data[1]["runners"][4]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
-                            if "8+" in q["name"]["value"]:
-                                if len(data[0]["runners"]) > 5 and len(data[1]["runners"]) > 5:
-                                    oddsOne = str(data[0]["runners"][5]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
-                                    oddsTwo = str(data[1]["runners"][5]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
-                            finalOdds = str(q["americanOdds"])
-                            devigurl = "https://api.crazyninjaodds.com/api/devigger/v1/sportsbook_devigger.aspx?api=open&legodds={}/7%,{}/7%&finalodds={}&devigmethod=4&args=ev_p,kelly".format(oddsOne, oddsTwo, finalOdds)
-                            devig = requests.get(devigurl)
-                            devig = devig.json()
-                            if "Final" in devig:
-                                #if devig["Final"]["EV_Percentage"] > 0:
-                                    #add to game
+                    break
+            if fd_one_id:
+                fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
+                mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true".format(id)
+                mgm = requests.get(mgm_one_url, headers = mgm_headers)
+                fd = requests.get(fd_one_url)
+                fd=fd.json()        
+                fd = fd["attachments"]["markets"]
+                data =[]
+                for i in fd:
+                    if "Alt Strikeouts" in fd[i]["marketName"]:
+                        data.append(fd[i])
+                mgm=mgm.json()
+                for i in mgm["fixture"]["games"]:
+                    if i["name"]["value"] == "Pitcher's Duel":
+                        mgm_results = i["results"]
+                        for q in mgm_results:
+                            #print(len(data))
+                            if len(data) == 2:                            
+                                game["AwayPitcher"] = data[0]["marketName"].split("-")[0]
+                                game["HomePitcher"] = data[1]["marketName"].split("-")[0]
+                                oddsOne = 0
+                                oddsTwo = 0
+                                if "5+" in q["name"]["value"]:
+                                    if len(data[0]["runners"]) > 2 and len(data[1]["runners"]) > 2:
+                                        oddsOne = str(data[0]["runners"][2]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
+                                        oddsTwo = str(data[1]["runners"][2]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
+                                if "6+" in q["name"]["value"]:
+                                    if len(data[0]["runners"]) > 3 and len(data[1]["runners"]) > 3:
+                                        oddsOne = str(data[0]["runners"][3]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
+                                        oddsTwo = str(data[1]["runners"][3]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
+                                if "7+" in q["name"]["value"]:
+                                    if len(data[0]["runners"]) > 4 and len(data[1]["runners"]) > 4:
+                                        oddsOne = str(data[0]["runners"][4]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
+                                        oddsTwo = str(data[1]["runners"][4]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
+                                if "8+" in q["name"]["value"]:
+                                    if len(data[0]["runners"]) > 5 and len(data[1]["runners"]) > 5:
+                                        oddsOne = str(data[0]["runners"][5]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
+                                        oddsTwo = str(data[1]["runners"][5]["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"])
+                                finalOdds = str(q["americanOdds"])
+                                devigurl = "https://api.crazyninjaodds.com/api/devigger/v1/sportsbook_devigger.aspx?api=open&legodds={}/7%,{}/7%&finalodds={}&devigmethod=4&args=ev_p,kelly".format(oddsOne, oddsTwo, finalOdds)
+                                devig = requests.get(devigurl)
+                                devig = devig.json()
+                                if "Final" in devig:
+                                    #if devig["Final"]["EV_Percentage"] > 0:
+                                        #add to game
 
-                                    #format odds to have a "+" at the start if they don't start with "-"
-                                    oddsOne = oddsOne if "-" in oddsOne else "+{}".format(oddsOne)
-                                    oddsTwo = oddsTwo if "-" in oddsTwo else "+{}".format(oddsTwo)
-                                    finalOdds = finalOdds if "-" in finalOdds else "+{}".format(finalOdds)
+                                        #format odds to have a "+" at the start if they don't start with "-"
+                                        oddsOne = oddsOne if "-" in oddsOne else "+{}".format(oddsOne)
+                                        oddsTwo = oddsTwo if "-" in oddsTwo else "+{}".format(oddsTwo)
+                                        finalOdds = finalOdds if "-" in finalOdds else "+{}".format(finalOdds)
 
-                                    #create CNM Devig link
-                                    DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25%2c{}%2f7%25&FinalOdds={}".format(oddsOne,oddsTwo,finalOdds)
-                                    fullKelly = devig["Final"]["Kelly_Full"]
-                                    bankroll = request.cookies.get('Bankroll')
-                                    kelly = request.cookies.get('KellyMultiplier')
-                                    if bankroll is None:
-                                        bankroll = 1000
-                                    if kelly is None:
-                                        kelly = .25
-                                    betSize = int(bankroll) * .01 * float(kelly) * fullKelly
+                                        #create CNM Devig link
+                                        DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25%2c{}%2f7%25&FinalOdds={}".format(oddsOne,oddsTwo,finalOdds)
+                                        fullKelly = devig["Final"]["Kelly_Full"]
+                                        bankroll = request.cookies.get('Bankroll')
+                                        kelly = request.cookies.get('KellyMultiplier')
+                                        if bankroll is None:
+                                            bankroll = 1000
+                                        if kelly is None:
+                                            kelly = .25
+                                        betSize = int(bankroll) * .01 * float(kelly) * fullKelly
                                     
-                                    Line = {"Name": q["name"]["value"], "Odds": finalOdds, "AwayPitcherOdds": oddsOne, "HomePitcherOdds": oddsTwo, "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "BetSize": '${:,.2f}'.format(betSize), "DevigLink": DevigLink, "FullKelly": fullKelly}
-                                    game["Lines"].append(Line)
+                                        Line = {"Name": q["name"]["value"], "Odds": finalOdds, "AwayPitcherOdds": oddsOne, "HomePitcherOdds": oddsTwo, "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "BetSize": '${:,.2f}'.format(betSize), "DevigLink": DevigLink, "FullKelly": fullKelly}
+                                        game["Lines"].append(Line)
 
-                                    #"EV": devig["Final"]["EV_Percentage"], "Kelly": devig["Final"]["Kelly_Full"]
-                                    #print(q["name"]["value"])
-                                    #print(q["americanOdds"])
-                                    #print(devig["Final"]["EV_Percentage"])
-                                    #print(devig["Final"]["Kelly_Full"])
-                        #print(q["name"]["value"])
-                        #print(q["americanOdds"])
-                    #if(len(game["Lines"]) > 0):
-                        #games.append(game)
-                    addGame = "false"
-                    for line in game["Lines"]:
-                        if '-' not in line["EVPercentage"]:
-                            addGame="true"
-                    if addGame == "true":
-                        games.append(game)
+                                        #"EV": devig["Final"]["EV_Percentage"], "Kelly": devig["Final"]["Kelly_Full"]
+                                        #print(q["name"]["value"])
+                                        #print(q["americanOdds"])
+                                        #print(devig["Final"]["EV_Percentage"])
+                                        #print(devig["Final"]["Kelly_Full"])
+                            #print(q["name"]["value"])
+                            #print(q["americanOdds"])
+                        #if(len(game["Lines"]) > 0):
+                            #games.append(game)
+                        addGame = "false"
+                        for line in game["Lines"]:
+                            if '-' not in line["EVPercentage"]:
+                                addGame="true"
+                        if addGame == "true":
+                            games.append(game)
                             
     print(games)
     return games
