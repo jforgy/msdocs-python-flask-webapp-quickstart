@@ -110,11 +110,11 @@ def getData():
             #2023-07-25T22:40:00Z
             mgmGameStart = datetime.strptime(i["startDate"], '%Y-%m-%dT%H:%M:%SZ')
             away = i["participants"][0]["name"]["short"]
-            #print(away)
+            print(away)
             #match away team to one competitor from fd_all[attachments][events]
             for fd in fd_all["attachments"]["events"]:
                 fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ')
-                print(away)
+                #print(away)
                 if (away in fd_all["attachments"]["events"][fd]["name"]) and (mgmGameStart.day == fdGameStart.day) and (mgmGameStart.hour == fdGameStart.hour):
                     #print("FD: {}".format(fd_all["attachments"]["events"][fd]["openDate"]))
                     #print(away)
