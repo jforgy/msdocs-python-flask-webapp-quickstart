@@ -227,6 +227,7 @@ def getPitcherProps():
             mgmGameStart = datetime.strptime(i["startDate"], '%Y-%m-%dT%H:%M:%SZ')
             away = i["participants"][0]["name"]["short"]
             for fd in fd_all["attachments"]["events"]:
+                fd_one_id = None
                 fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ')
                 if (away in fd_all["attachments"]["events"][fd]["name"]) and (mgmGameStart.day == fdGameStart.day) and (mgmGameStart.hour == fdGameStart.hour):
                     #print("FD: {}".format(fd_all["attachments"]["events"][fd]["openDate"]))
@@ -234,85 +235,86 @@ def getPitcherProps():
                     #create game, may be scrapped later if no lines are added
                     #print(fd_all["attachments"]["events"][fd]["name"])
                     fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
-                    #break
-            fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
+                    break
+            if fd_one_id:
+                fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
+                mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true".format(id)
+                mgm = requests.get(mgm_one_url, headers = mgm_headers)
+                fd = requests.get(fd_one_url)
+                fd=fd.json()        
+                fd = fd["attachments"]["markets"]
+                data =[]            
+                for i in fd:
+                    if "Alt Strikeouts" in fd[i]["marketName"]:
+                        data.append(fd[i])
             mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true".format(id)
             mgm = requests.get(mgm_one_url, headers = mgm_headers)
-            fd = requests.get(fd_one_url)
-            fd=fd.json()        
-            fd = fd["attachments"]["markets"]
-            data =[]            
-            for i in fd:
-                if "Alt Strikeouts" in fd[i]["marketName"]:
-                    data.append(fd[i])
-        mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true".format(id)
-        mgm = requests.get(mgm_one_url, headers = mgm_headers)
-        mgm=mgm.json()
-        for i in mgm["fixture"]["games"]:
-            if len(data) == 2:
-                game = {"Name": mgm["fixture"]["name"]["value"], "Lines": list(), "AwayPitcher": "", "HomePitcher": ""}                                             
-                awayPitcher = data[0]["marketName"].split("-")[0]
-                homePitcher = data[1]["marketName"].split("-")[0]
-                game["awayPitcher"] = awayPitcher
-                game["homePitcher"] = homePitcher
-                if "Starting Pitcher Props" in i["name"]["value"] and awayPitcher in i["name"]["value"]:
-                    print(i["name"]["value"])
-                    for p in i["results"]:
-                        if "Strikeouts" in p["name"]["value"]:
-                            print("MGM - {}: {}".format(p["name"]["value"], p["americanOdds"]))
-                            str = "{}{}+".format(awayPitcher, p["attr"])
-                            for r in data[0]["runners"]:
-                                #rint(r)
-                                #print(str)
-                                name = r["runnerName"]
-                                #print(r["runnerName"])
-                                if str in name:
-                                    devigurl = "https://api.crazyninjaodds.com/api/devigger/v1/sportsbook_devigger.aspx?api=open&legodds={}/7%&finalodds={}&devigmethod=4&args=ev_p,kelly".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
-                                    devig = requests.get(devigurl)
-                                    devig = devig.json()
-                                    print("FD - {}: {}".format(r["runnerName"], r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]))
-                                    DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25&FinalOdds={}".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
-                                    if "Final" in devig:
-                                        fullKelly = devig["Final"]["Kelly_Full"]
-                                        bankroll = request.cookies.get('Bankroll')
-                                        kelly = request.cookies.get('KellyMultiplier')
-                                        if bankroll is None:
-                                            bankroll = 1000
-                                        if kelly is None:
-                                            kelly = .25
-                                        betSize = int(bankroll) * .01 * float(kelly) * fullKelly
-                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink, "BetSize": '${:,.2f}'.format(betSize)}    
-                                        game["Lines"].append(Line)
-                if "Starting Pitcher Props" in i["name"]["value"] and homePitcher in i["name"]["value"]:
-                    print(i["name"]["value"])
-                    for p in i["results"]:
-                        if "Strikeouts" in p["name"]["value"]:
-                            print("MGM - {}: {}".format(p["name"]["value"], p["americanOdds"]))
-                            str = "{}{}+".format(homePitcher, p["attr"])
-                            for r in data[1]["runners"]:
-                                #rint(r)
-                                #print(str)
-                                name = r["runnerName"]
-                                #print(r["runnerName"])
-                                if str in name:
-                                    devigurl = "https://api.crazyninjaodds.com/api/devigger/v1/sportsbook_devigger.aspx?api=open&legodds={}/7%&finalodds={}&devigmethod=4&args=ev_p,kelly".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
-                                    devig = requests.get(devigurl)
-                                    devig = devig.json()
-                                    print("FD - {}: {}".format(r["runnerName"], r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]))
-                                    DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25&FinalOdds={}".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
-                                    if "Final" in devig:
-                                        fullKelly = devig["Final"]["Kelly_Full"]
-                                        bankroll = request.cookies.get('Bankroll')
-                                        kelly = request.cookies.get('KellyMultiplier')
-                                        if bankroll is None:
-                                            bankroll = 1000
-                                        if kelly is None:
-                                            kelly = .25
-                                        betSize = int(bankroll) * .01 * float(kelly) * fullKelly
-                                        Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink, "BetSize": '${:,.2f}'.format(betSize)}                                        
-                                        game["Lines"].append(Line)
-                if(len(game["Lines"]) > 0):
-                    games.append(game)
+            mgm=mgm.json()
+            for i in mgm["fixture"]["games"]:
+                if len(data) == 2:
+                    game = {"Name": mgm["fixture"]["name"]["value"], "Lines": list(), "AwayPitcher": "", "HomePitcher": ""}                                             
+                    awayPitcher = data[0]["marketName"].split("-")[0]
+                    homePitcher = data[1]["marketName"].split("-")[0]
+                    game["awayPitcher"] = awayPitcher
+                    game["homePitcher"] = homePitcher
+                    if "Starting Pitcher Props" in i["name"]["value"] and awayPitcher in i["name"]["value"]:
+                        print(i["name"]["value"])
+                        for p in i["results"]:
+                            if "Strikeouts" in p["name"]["value"]:
+                                print("MGM - {}: {}".format(p["name"]["value"], p["americanOdds"]))
+                                str = "{}{}+".format(awayPitcher, p["attr"])
+                                for r in data[0]["runners"]:
+                                    #rint(r)
+                                    #print(str)
+                                    name = r["runnerName"]
+                                    #print(r["runnerName"])
+                                    if str in name:
+                                        devigurl = "https://api.crazyninjaodds.com/api/devigger/v1/sportsbook_devigger.aspx?api=open&legodds={}/7%&finalodds={}&devigmethod=4&args=ev_p,kelly".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
+                                        devig = requests.get(devigurl)
+                                        devig = devig.json()
+                                        print("FD - {}: {}".format(r["runnerName"], r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]))
+                                        DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25&FinalOdds={}".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
+                                        if "Final" in devig:
+                                            fullKelly = devig["Final"]["Kelly_Full"]
+                                            bankroll = request.cookies.get('Bankroll')
+                                            kelly = request.cookies.get('KellyMultiplier')
+                                            if bankroll is None:
+                                                bankroll = 1000
+                                            if kelly is None:
+                                                kelly = .25
+                                            betSize = int(bankroll) * .01 * float(kelly) * fullKelly
+                                            Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink, "BetSize": '${:,.2f}'.format(betSize)}    
+                                            game["Lines"].append(Line)
+                    if "Starting Pitcher Props" in i["name"]["value"] and homePitcher in i["name"]["value"]:
+                        print(i["name"]["value"])
+                        for p in i["results"]:
+                            if "Strikeouts" in p["name"]["value"]:
+                                print("MGM - {}: {}".format(p["name"]["value"], p["americanOdds"]))
+                                str = "{}{}+".format(homePitcher, p["attr"])
+                                for r in data[1]["runners"]:
+                                    #rint(r)
+                                    #print(str)
+                                    name = r["runnerName"]
+                                    #print(r["runnerName"])
+                                    if str in name:
+                                        devigurl = "https://api.crazyninjaodds.com/api/devigger/v1/sportsbook_devigger.aspx?api=open&legodds={}/7%&finalodds={}&devigmethod=4&args=ev_p,kelly".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
+                                        devig = requests.get(devigurl)
+                                        devig = devig.json()
+                                        print("FD - {}: {}".format(r["runnerName"], r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]))
+                                        DevigLink = "http://crazyninjamike.com/Public/sportsbooks/sportsbook_devigger.aspx?autofill=1&LegOdds={}%2f7%25&FinalOdds={}".format(r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], p["americanOdds"])
+                                        if "Final" in devig:
+                                            fullKelly = devig["Final"]["Kelly_Full"]
+                                            bankroll = request.cookies.get('Bankroll')
+                                            kelly = request.cookies.get('KellyMultiplier')
+                                            if bankroll is None:
+                                                bankroll = 1000
+                                            if kelly is None:
+                                                kelly = .25
+                                            betSize = int(bankroll) * .01 * float(kelly) * fullKelly
+                                            Line = {"Name": name, "FanduelOdds": r["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"], "MGMOdds": p["americanOdds"], "EVPercentage": '{:.2%}'.format(devig["Final"]["EV_Percentage"]), "FullKelly": "{:.2f}".format(devig["Final"]["Kelly_Full"]), "DevigLink": DevigLink, "BetSize": '${:,.2f}'.format(betSize)}                                        
+                                            game["Lines"].append(Line)
+                    if(len(game["Lines"]) > 0):
+                        games.append(game)
 
     return games
 
@@ -337,6 +339,7 @@ def getPitcherH2H():
             #print(away)
             #match away team to one competitor from fd_all[attachments][events]
             for fd in fd_all["attachments"]["events"]:
+                fd_one_id = None
                 fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ')
                 if (away in fd_all["attachments"]["events"][fd]["name"]) and (mgmGameStart.day == fdGameStart.day) and (mgmGameStart.hour == fdGameStart.hour):
                     #print("FD: {}".format(fd_all["attachments"]["events"][fd]["openDate"]))
@@ -346,44 +349,45 @@ def getPitcherH2H():
                     #print(fd_all["attachments"]["events"][fd]["name"])
                     fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
                     #break
-            fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
-            mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true&includeRelatedFixtures=true".format(id)
-            mgm = requests.get(mgm_one_url, headers = mgm_headers)
-            fd = requests.get(fd_one_url)
-            fd=fd.json()        
-            fd = fd["attachments"]["markets"]
-            data =[]
-            for i in fd:
-                if "Alt Strikeouts" in fd[i]["marketName"]:
-                    data.append(fd[i])
-            mgm=mgm.json()            
-            if "linkedFixture" in mgm:
-                for i in mgm["linkedFixture"]["optionMarkets"]:
-                    if (i["name"]["value"] == "Most Ks" and i["status"] != "Suspended"):
-                         #Options[2]
-                         #options[0].name.value
-                         #options[0].price.americanodds
-                         if len(data) == 2:
-                            HomeFDAlts = list()
-                            AwayFDAlts = list()
-                            awayPitcher = data[0]["marketName"].split("-")[0].rstrip()
-                            homePitcher = data[1]["marketName"].split("-")[0].rstrip()
-                            game["AwayPitcher"] = awayPitcher
-                            game["HomePitcher"] = homePitcher
-                            a = i["options"][0]["name"]["value"]
-                            if awayPitcher == i["options"][0]["name"]["value"]:
-                                game["AwayOdds"] = i["options"][0]["price"]["americanOdds"] if "-" in str(i["options"][0]["price"]["americanOdds"]) else "+{}".format(i["options"][0]["price"]["americanOdds"])
-                                game["HomeOdds"] = i["options"][1]["price"]["americanOdds"] if "-" in str(i["options"][1]["price"]["americanOdds"]) else "+{}".format(i["options"][1]["price"]["americanOdds"])
-                            else:
-                                game["AwayOdds"] = i["options"][1]["price"]["americanOdds"] if "-" in str(i["options"][1]["price"]["americanOdds"]) else "+{}".format(i["options"][1]["price"]["americanOdds"])
-                                game["HomeOdds"] = i["options"][0]["price"]["americanOdds"] if "-" in str(i["options"][0]["price"]["americanOdds"]) else "+{}".format(i["options"][0]["price"]["americanOdds"])
-                            for line in data[0]["runners"]:
-                                Line = { "Label": line["runnerName"], "Odds": line["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"] }
-                                game["AwayFDAlts"].append(Line)
-                            for line in data[1]["runners"]:                 
-                                Line = { "Label": line["runnerName"], "Odds": line["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"] }           
-                                game["HomeFDAlts"].append(Line)
-                            games.append(game)
+            if fd_one_id:
+                    fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
+                mgm_one_url = "https://sports.il.betmgm.com/cds-api/bettingoffer/fixture-view?x-bwin-accessid=ZTg4YWEwMTgtZTlhYy00MWRkLWIzYWYtZjMzODI5ZDE0Mjc5&lang=en-us&country=US&userCountry=US&subdivision=US-Illinois&offerMapping=All&scoreboardMode=Full&fixtureIds={}&state=Latest&includePrecreatedBetBuilder=true&supportVirtual=false&useRegionalisedConfiguration=true&includeRelatedFixtures=true".format(id)
+                mgm = requests.get(mgm_one_url, headers = mgm_headers)
+                fd = requests.get(fd_one_url)
+                fd=fd.json()        
+                fd = fd["attachments"]["markets"]
+                data =[]
+                for i in fd:
+                    if "Alt Strikeouts" in fd[i]["marketName"]:
+                        data.append(fd[i])
+                mgm=mgm.json()            
+                if "linkedFixture" in mgm:
+                    for i in mgm["linkedFixture"]["optionMarkets"]:
+                        if (i["name"]["value"] == "Most Ks" and i["status"] != "Suspended"):
+                             #Options[2]
+                             #options[0].name.value
+                             #options[0].price.americanodds
+                             if len(data) == 2:
+                                HomeFDAlts = list()
+                                AwayFDAlts = list()
+                                awayPitcher = data[0]["marketName"].split("-")[0].rstrip()
+                                homePitcher = data[1]["marketName"].split("-")[0].rstrip()
+                                game["AwayPitcher"] = awayPitcher
+                                game["HomePitcher"] = homePitcher
+                                a = i["options"][0]["name"]["value"]
+                                if awayPitcher == i["options"][0]["name"]["value"]:
+                                    game["AwayOdds"] = i["options"][0]["price"]["americanOdds"] if "-" in str(i["options"][0]["price"]["americanOdds"]) else "+{}".format(i["options"][0]["price"]["americanOdds"])
+                                    game["HomeOdds"] = i["options"][1]["price"]["americanOdds"] if "-" in str(i["options"][1]["price"]["americanOdds"]) else "+{}".format(i["options"][1]["price"]["americanOdds"])
+                                else:
+                                    game["AwayOdds"] = i["options"][1]["price"]["americanOdds"] if "-" in str(i["options"][1]["price"]["americanOdds"]) else "+{}".format(i["options"][1]["price"]["americanOdds"])
+                                    game["HomeOdds"] = i["options"][0]["price"]["americanOdds"] if "-" in str(i["options"][0]["price"]["americanOdds"]) else "+{}".format(i["options"][0]["price"]["americanOdds"])
+                                for line in data[0]["runners"]:
+                                    Line = { "Label": line["runnerName"], "Odds": line["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"] }
+                                    game["AwayFDAlts"].append(Line)
+                                for line in data[1]["runners"]:                 
+                                    Line = { "Label": line["runnerName"], "Odds": line["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"] }           
+                                    game["HomeFDAlts"].append(Line)
+                                games.append(game)
     return games
 
 @app.route('/savesettings', methods = ['GET', 'POST'])
