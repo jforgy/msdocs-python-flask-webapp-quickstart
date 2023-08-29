@@ -79,6 +79,30 @@ def h2hpitchers():
     resp.set_cookie('KellyMultiplier', kelly, max_age=99999999)
     return resp
 
+@app.route('/czrvsfd')
+def czrvsfdks():
+    """Renders the home page."""
+    bankroll = request.cookies.get('Bankroll')
+    kelly = request.cookies.get('KellyMultiplier')
+    if bankroll is None:
+        bankroll = '1000'
+    if kelly is None:
+        kelly = '.25'
+
+    games = CZRvsFD()
+    resp = make_response(render_template(
+        'czrvsfd.html',
+        title='CZR vs FD',
+        games = games,
+        year=datetime.now().year,
+        bankroll = bankroll,
+        kelly = kelly
+    ))
+    resp.set_cookie('Bankroll', bankroll, max_age=99999999)
+    resp.set_cookie('KellyMultiplier', kelly, max_age=99999999)
+    return resp
+
+
 @app.route('/data')
 def data():
     data = getData()
@@ -388,6 +412,78 @@ def getPitcherH2H():
                                     Line = { "Label": line["runnerName"], "Odds": line["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"] }           
                                     game["HomeFDAlts"].append(Line)
                                 games.append(game)
+    return games
+
+def CZRvsFD():    
+    games = list()
+    czr_all_url = "https://api.americanwagering.com/regions/us/locations/il/brands/czr/sb/v3/sports/baseball/events/schedule"
+    fd_all_url = "https://sbapi.il.sportsbook.fanduel.com/api/content-managed-page?page=CUSTOM&customPageId=mlb&_ak=FhMFpcPWXMeyZxOx&timezone=America%2FChicago"
+    czr_headers = {
+        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+        }
+    czr_all = requests.get(czr_all_url, headers = czr_headers)
+    czr_all = czr_all.json()
+    fd_all = requests.get(fd_all_url)
+    fd_all = fd_all.json()
+    Games = {}
+    if "competitions" in czr_all:
+        events = czr_all["competitions"][0]["events"]
+        for event in events:
+            game = {"Name": event["name"].replace("|", ""), "HomePitcher": event["metadata"]["currentHomeStartingPitcher"].split(" ")[1], "AwayPitcher": event["metadata"]["currentAwayStartingPitcher"].split(" ")[1], "Lines": list(), "data": list() }
+            czr_one_id = event["id"]            
+            czrGameStart = datetime.strptime(event["startTime"], '%Y-%m-%dT%H:%M:%SZ')
+            away = event["name"].split("|")[1]
+            for fd in fd_all["attachments"]["events"]:                
+                fd_one_id = None
+                fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ')
+                if (away in fd_all["attachments"]["events"][fd]["name"]) and (czrGameStart.day == fdGameStart.day) and (czrGameStart.hour == fdGameStart.hour):
+                    #print("FD: {}".format(fd_all["attachments"]["events"][fd]["openDate"]))
+                    #print(away)
+                    #create game, may be scrapped later if no lines are added
+                    #print(fd_all["attachments"]["events"][fd]["name"])
+                    fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
+                    break
+            if fd_one_id:               
+                czr_one_url = "https://api.americanwagering.com/regions/us/locations/il/brands/czr/sb/v3/events/{}".format(czr_one_id)
+                czr = requests.get(czr_one_url, headers = czr_headers)
+                fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
+                fd = requests.get(fd_one_url)
+                fd=fd.json()        
+                fd = fd["attachments"]["markets"]
+                data =[]            
+                for i in fd:
+                    if "Alt Strikeouts" in fd[i]["marketName"]:
+                        for runner in fd[i]["runners"]:
+                            runnerNameSplit = runner["runnerName"].split(" ")
+                            line =  { "Book": "FD", "LastName": runnerNameSplit[1], "Line": int(runnerNameSplit[2].replace("+","")), "Price": runner["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]  }
+                            game["Lines"].append(line)
+                czr = czr.json()
+                if "markets" in czr:
+                    for market in czr["markets"]:
+                        if "Alternate Strikeouts" in market["displayName"]:
+                            nameSplit = market["name"].split("|")
+                            line = { "Book": "CZR", "LastName": nameSplit[1].split(" ")[1], "Line": int(nameSplit[3].split(" ")[2].replace("+","")), "Price": market["selections"][0]["price"]["a"]  }
+                        
+                            game["Lines"].append(line)        
+                    game["Lines"] = (sorted(game["Lines"], key=lambda x: x["Line"]))
+                    games.append(game)
+    #games = {k:v for (k,v) in games.items() if filter_string in k}
+    for game in games:
+        for number in range(3,12):
+                awayRowCZR = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["AwayPitcher"] and g['Book'] == 'CZR', game["Lines"]))
+                homeRowCZR = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["HomePitcher"] and g['Book'] == 'CZR', game["Lines"]))
+                awayRowFD = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["AwayPitcher"] and g['Book'] == 'FD', game["Lines"]))
+                homeRowFD = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["HomePitcher"] and g['Book'] == 'FD', game["Lines"]))
+                game["data"].append({
+                    "Line": number, 
+                    "awayPitcher": game["AwayPitcher"], 
+                    "homePitcher": game["HomePitcher"], 
+                    "awayCZR": awayRowCZR[0]["Price"] if len(awayRowCZR) > 0 else "N/A",
+                    "awayFD": awayRowFD[0]["Price"] if len(awayRowFD) > 0 else "N/A", 
+                    "homeCZR": homeRowCZR[0]["Price"] if len(homeRowCZR) > 0 else "N/A", 
+                    "homeFD": homeRowFD[0]["Price"] if len(homeRowFD) > 0 else "N/A"
+                    })
+       #xyz= list(filter(lambda g: g['Line'] == 1, g["Lines"]))
     return games
 
 @app.route('/savesettings', methods = ['GET', 'POST'])

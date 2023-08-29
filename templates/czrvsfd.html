@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+
+{% for game in games %}
+<div class="row">
+    <div class="col-md-12">
+        <h3>
+            {{game.Name}}
+        </h3>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <td>
+                        Line
+                    </td>
+                    <td>
+                        {{game.awayPitcher}}
+                    </td>
+                    <td>
+                        Caesars
+                    </td>
+                    <td>
+                        Fanduel
+                    </td>
+                    <td>
+                        {{game.homePitcher}}
+                    </td>
+                    <td>
+                        Caesars
+                    </td>
+                    <td>
+                        Fanduel
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in game.data %}
+                <tr>
+                    <td>
+                        {{d["Line"]}}
+                    </td>
+                    <td>
+                        {{d["awayPitcher"]}}
+                    </td>
+                    <td>
+                        {{d["awayCZR"]}}
+                    </td>
+                    <td>
+                        {{d["awayFD"]}}
+                    </td>
+                    <td>
+                        {{d["homePitcher"]}}
+                    </td>
+                    <td>
+                        {{d["homeCZR"]}}
+                    </td>
+                    <td>
+                        {{d["homeFD"]}}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+        {% endfor %}
+
+        {% endblock %}
