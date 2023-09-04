@@ -429,60 +429,61 @@ def CZRvsFD():
     if "competitions" in czr_all:
         events = czr_all["competitions"][0]["events"]
         for event in events:
-            game = {"Name": event["name"].replace("|", ""), "HomePitcher": event["metadata"]["currentHomeStartingPitcher"].split(" ")[1], "AwayPitcher": event["metadata"]["currentAwayStartingPitcher"].split(" ")[1], "Lines": list(), "data": list() }
-            czr_one_id = event["id"]            
-            czrGameStart = datetime.strptime(event["startTime"], '%Y-%m-%dT%H:%M:%SZ')
-            away = event["name"].split("|")[1]
-            for fd in fd_all["attachments"]["events"]:                
-                fd_one_id = None
-                fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ')
-                if (away in fd_all["attachments"]["events"][fd]["name"]) and (czrGameStart.day == fdGameStart.day) and (czrGameStart.hour == fdGameStart.hour):
-                    #print("FD: {}".format(fd_all["attachments"]["events"][fd]["openDate"]))
-                    #print(away)
-                    #create game, may be scrapped later if no lines are added
-                    #print(fd_all["attachments"]["events"][fd]["name"])
-                    fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
-                    break
-            if fd_one_id:               
-                czr_one_url = "https://api.americanwagering.com/regions/us/locations/il/brands/czr/sb/v3/events/{}".format(czr_one_id)
-                czr = requests.get(czr_one_url, headers = czr_headers)
-                fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
-                fd = requests.get(fd_one_url)
-                fd=fd.json()        
-                fd = fd["attachments"]["markets"]
-                data =[]            
-                for i in fd:
-                    if "Alt Strikeouts" in fd[i]["marketName"]:
-                        for runner in fd[i]["runners"]:
-                            runnerNameSplit = runner["runnerName"].split(" ")
-                            line =  { "Book": "FD", "LastName": runnerNameSplit[1], "Line": int(runnerNameSplit[2].replace("+","")), "Price": runner["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]  }
-                            game["Lines"].append(line)
-                czr = czr.json()
-                if "markets" in czr:
-                    for market in czr["markets"]:
-                        if "Alternate Strikeouts" in market["displayName"]:
-                            nameSplit = market["name"].split("|")
-                            line = { "Book": "CZR", "LastName": nameSplit[1].split(" ")[1], "Line": int(nameSplit[3].split(" ")[2].replace("+","")), "Price": market["selections"][0]["price"]["a"]  }
+            if("currentHomeStartingPitcher" in event["metadata"]):
+                game = {"Name": event["name"].replace("|", ""), "HomePitcher": event["metadata"]["currentHomeStartingPitcher"].split(" ")[1], "AwayPitcher": event["metadata"]["currentAwayStartingPitcher"].split(" ")[1], "Lines": list(), "data": list() }
+                czr_one_id = event["id"]            
+                czrGameStart = datetime.strptime(event["startTime"], '%Y-%m-%dT%H:%M:%SZ')
+                away = event["name"].split("|")[1]
+                for fd in fd_all["attachments"]["events"]:                
+                    fd_one_id = None
+                    fdGameStart = datetime.strptime(fd_all["attachments"]["events"][fd]["openDate"], '%Y-%m-%dT%H:%M:%S.%fZ')
+                    if (away in fd_all["attachments"]["events"][fd]["name"]) and (czrGameStart.day == fdGameStart.day) and (czrGameStart.hour == fdGameStart.hour):
+                        #print("FD: {}".format(fd_all["attachments"]["events"][fd]["openDate"]))
+                        #print(away)
+                        #create game, may be scrapped later if no lines are added
+                        #print(fd_all["attachments"]["events"][fd]["name"])
+                        fd_one_id = fd_all["attachments"]["events"][fd]["eventId"]
+                        break
+                if fd_one_id:               
+                    czr_one_url = "https://api.americanwagering.com/regions/us/locations/il/brands/czr/sb/v3/events/{}".format(czr_one_id)
+                    czr = requests.get(czr_one_url, headers = czr_headers)
+                    fd_one_url = "https://sbapi.il.sportsbook.fanduel.com/api/event-page?_ak=FhMFpcPWXMeyZxOx&eventId={}&tab=pitcher-props".format(fd_one_id)
+                    fd = requests.get(fd_one_url)
+                    fd=fd.json()        
+                    fd = fd["attachments"]["markets"]
+                    data =[]            
+                    for i in fd:
+                        if "Alt Strikeouts" in fd[i]["marketName"]:
+                            for runner in fd[i]["runners"]:
+                                runnerNameSplit = runner["runnerName"].split(" ")
+                                line =  { "Book": "FD", "LastName": runnerNameSplit[1], "Line": int(runnerNameSplit[2].replace("+","")), "Price": runner["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]  }
+                                game["Lines"].append(line)
+                    czr = czr.json()
+                    if "markets" in czr:
+                        for market in czr["markets"]:
+                            if "Alternate Strikeouts" in market["displayName"]:
+                                nameSplit = market["name"].split("|")
+                                line = { "Book": "CZR", "LastName": nameSplit[1].split(" ")[1], "Line": int(nameSplit[3].split(" ")[2].replace("+","")), "Price": market["selections"][0]["price"]["a"]  }
                         
-                            game["Lines"].append(line)        
-                    game["Lines"] = (sorted(game["Lines"], key=lambda x: x["Line"]))
-                    games.append(game)
-    #games = {k:v for (k,v) in games.items() if filter_string in k}
-    for game in games:
-        for number in range(3,12):
-                awayRowCZR = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["AwayPitcher"] and g['Book'] == 'CZR', game["Lines"]))
-                homeRowCZR = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["HomePitcher"] and g['Book'] == 'CZR', game["Lines"]))
-                awayRowFD = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["AwayPitcher"] and g['Book'] == 'FD', game["Lines"]))
-                homeRowFD = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["HomePitcher"] and g['Book'] == 'FD', game["Lines"]))
-                game["data"].append({
-                    "Line": number, 
-                    "awayPitcher": game["AwayPitcher"], 
-                    "homePitcher": game["HomePitcher"], 
-                    "awayCZR": awayRowCZR[0]["Price"] if len(awayRowCZR) > 0 else "N/A",
-                    "awayFD": awayRowFD[0]["Price"] if len(awayRowFD) > 0 else "N/A", 
-                    "homeCZR": homeRowCZR[0]["Price"] if len(homeRowCZR) > 0 else "N/A", 
-                    "homeFD": homeRowFD[0]["Price"] if len(homeRowFD) > 0 else "N/A"
-                    })
+                                game["Lines"].append(line)        
+                        game["Lines"] = (sorted(game["Lines"], key=lambda x: x["Line"]))
+                        games.append(game)
+        #games = {k:v for (k,v) in games.items() if filter_string in k}
+        for game in games:
+            for number in range(3,12):
+                    awayRowCZR = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["AwayPitcher"] and g['Book'] == 'CZR', game["Lines"]))
+                    homeRowCZR = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["HomePitcher"] and g['Book'] == 'CZR', game["Lines"]))
+                    awayRowFD = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["AwayPitcher"] and g['Book'] == 'FD', game["Lines"]))
+                    homeRowFD = list(filter(lambda g: g['Line'] == number and g['LastName'] in game["HomePitcher"] and g['Book'] == 'FD', game["Lines"]))
+                    game["data"].append({
+                        "Line": number, 
+                        "awayPitcher": game["AwayPitcher"], 
+                        "homePitcher": game["HomePitcher"], 
+                        "awayCZR": awayRowCZR[0]["Price"] if len(awayRowCZR) > 0 else "N/A",
+                        "awayFD": awayRowFD[0]["Price"] if len(awayRowFD) > 0 else "N/A", 
+                        "homeCZR": homeRowCZR[0]["Price"] if len(homeRowCZR) > 0 else "N/A", 
+                        "homeFD": homeRowFD[0]["Price"] if len(homeRowFD) > 0 else "N/A"
+                        })
        #xyz= list(filter(lambda g: g['Line'] == 1, g["Lines"]))
     return games
 
