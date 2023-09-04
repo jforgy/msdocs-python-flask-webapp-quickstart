@@ -79,7 +79,7 @@ def h2hpitchers():
     resp.set_cookie('KellyMultiplier', kelly, max_age=99999999)
     return resp
 
-@app.route('/czrvsfd')
+@app.route('/czrvsfdks')
 def czrvsfdks():
     """Renders the home page."""
     bankroll = request.cookies.get('Bankroll')
