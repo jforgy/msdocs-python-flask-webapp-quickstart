@@ -26,10 +26,10 @@ def home():
         games = games,
         year=datetime.now().year,
         bankroll = bankroll,
-        kelly = kelly,
+        kelly = kelly
     ))
-    resp.set_cookie('Bankroll', bankroll, max_age=99999999)
-    resp.set_cookie('KellyMultiplier', kelly, max_age=99999999)
+    resp.set_cookie('Bankroll', bankroll, max_age=999999999)
+    resp.set_cookie('KellyMultiplier', kelly, max_age=999999999)
     return resp
 
 
@@ -52,8 +52,8 @@ def pitcherprops():
         bankroll = bankroll,
         kelly = kelly
     ))
-    resp.set_cookie('Bankroll', bankroll, max_age=99999999)
-    resp.set_cookie('KellyMultiplier', kelly, max_age=99999999)
+    resp.set_cookie('Bankroll', bankroll, max_age=999999999)
+    resp.set_cookie('KellyMultiplier', kelly, max_age=999999999)
     return resp
 
 @app.route('/h2hpitchers')
@@ -79,7 +79,7 @@ def h2hpitchers():
     resp.set_cookie('KellyMultiplier', kelly, max_age=99999999)
     return resp
 
-@app.route('/czrvsfd')
+@app.route('/czrvsfdks')
 def czrvsfdks():
     """Renders the home page."""
     bankroll = request.cookies.get('Bankroll')
@@ -102,9 +102,10 @@ def czrvsfdks():
     resp.set_cookie('KellyMultiplier', kelly, max_age=99999999)
     return resp
 
+
 @app.route('/data')
 def data():
-    data = CZRvsFD()
+    data = getData()
     response = app.response_class(
         response = json.dumps(data),
         status = 200,
@@ -500,16 +501,14 @@ def CZRvsFD():
        #xyz= list(filter(lambda g: g['Line'] == 1, g["Lines"]))
     return games
 
-
-
 @app.route('/savesettings', methods = ['GET', 'POST'])
 def setcookie():    
       # Initializing response object
       bankroll = request.form['Bankroll']
       kelly = request.form['Kelly']
       resp = make_response('Settings have been updated') 
-      resp.set_cookie('KellyMultiplier', kelly, max_age=99999999)
-      resp.set_cookie('Bankroll', bankroll, max_age=99999999)
+      resp.set_cookie('KellyMultiplier', kelly, max_age=999999999)
+      resp.set_cookie('Bankroll', bankroll, max_age=999999999)
       return resp
 
 @app.route('/getcookie')
@@ -517,4 +516,5 @@ def getcookie():
     k = request.cookies.get('KellyMultiplier')
     b = request.cookies.get('Bankroll')
     return 'Multiplier: '+ k + ' Bankroll: ' + b
-
+if __name__ == '__main__':
+   app.run(debug=False,host='0.0.0.0')
