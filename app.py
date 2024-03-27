@@ -4,7 +4,11 @@ import json
 from datetime import datetime
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for, make_response)
+
 app = Flask(__name__)
+
+
+@app.route('/')
 @app.route('/')
 @app.route('/home')
 def home():
