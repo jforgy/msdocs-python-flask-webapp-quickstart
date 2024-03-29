@@ -197,7 +197,7 @@ def getData():
                                 devig = requests.get(devigurl)
                                 devig = devig.json()
                                 if "Final" in devig:
-                                    if devig["Final"]["EV_Percentage"] > 0:
+                                    #if devig["Final"]["EV_Percentage"] > 0:
                                         #add to game
 
                                         #format odds to have a "+" at the start if they don't start with "-"
