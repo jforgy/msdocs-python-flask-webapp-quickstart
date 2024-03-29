@@ -2,3 +2,4 @@ Flask==2.0.2
 gunicorn
 requests
 pygsheets==2.0.6
+pandas==1.1.5
