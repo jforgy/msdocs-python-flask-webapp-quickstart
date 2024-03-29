@@ -2,70 +2,29 @@
 
 {% block content %}
 
-
-{% for game in games %}
-<div class="row">
-    <div class="col-md-12">
-        <h3>
-            {{game.Name}}
-        </h3>
-
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <td>
-                        Bet
-                    </td>
-                    <td>
-                        Odds
-                    </td>
-                    <td>
-                        {{game.AwayPitcher}}
-                    </td>
-                    <td>
-                        {{game.HomePitcher}}
-                    </td>
-                    <td>
-                        EV%
-                    </td>
-                    <td>
-                        Recomended Bet Size
-                    </td>
-                    <td>
-                        Devig Link
-                    </td>
-                </tr>
-            </thead>
-            <tbody>
-                {% for line in game["Lines"] %}
-                <tr>
-                    <td>
-                        {{line["Name"]}}
-                    </td>
-                    <td>
-                        {{line["Odds"]}}
-                    </td>
-                    <td>
-                        {{line["AwayPitcherOdds"]}}
-                    </td>
-                    <td>
-                        {{line["HomePitcherOdds"]}}
-                    </td>
-                    <td>
-                        {{line["EVPercentage"]}}
-                    </td>
-                    <td class="BetSize" data-fk="{{line["FullKelly"]}}">
-                        {{line["BetSize"]}}
-                    </td>
-                    <td>
-                        <a href="{{line["DevigLink"]}}" target="_blank">Link</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-        {% endfor %}
+{% for table in tables %}
+{{ table|safe }}
+    {% endfor %}
 
         {% endblock %}
+
+{% block scripts %}
+<script>
+    $("#bets").dataTable({
+        "iDisplayLength": -1,
+        order: [[5, "desc"]],
+        info: false,
+        paging: false
+    });
+
+    $(function(){
+        $.ajax({
+            "method": 'get',
+            "url": './writetosheet',
+            "success": function (resp) {
+                console.log(resp);
+            }
+        });
+    })
+</script>
+{% endblock %}
