@@ -228,7 +228,7 @@ def getData():
                             #print(q["americanOdds"])
                         #if(len(game["Lines"]) > 0):
                             #games.append(game)
-                        addGame = "false"
+                        addGame = "true"
                         for line in game["Lines"]:
                             if '-' not in line["EVPercentage"]:
                                 addGame="true"
