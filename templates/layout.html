@@ -3,9 +3,10 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitcher's Duels</title>
+    <title>{{ title }} - My Flask Application</title>
     <link rel="stylesheet" type="text/css" href="/static/content/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/static/content/site.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.min.css" />
     <script src="/static/scripts/modernizr-2.6.2.js"></script>
 </head>
 
@@ -25,22 +26,22 @@
                     <li><a href="{{ url_for('home') }}">Home</a></li>
                     <li><a href="{{ url_for('pitcherprops') }}">Pitcher Props</a></li>
                     <li><a href="{{ url_for('h2hpitchers') }}">H2H Pitchers</a></li>
-                    <li><a href="{{ url_for('czrvsfdks') }}">CZR vs FD</a></li>
                 </ul>
             </div>
         </div>
     </div>
 
     <div class="container body-content">
-        {{Poop}}
-        <div class="row" style="margin-top:30px;">
-            <div class="col-md-2">Kelly Multiplier: </div><div class="col-md-4"><input onchange="UpdateBetSizes()" type='number' id="kelly" value="{{kelly}}" /></div>
-        </div>
-        <div class="row">
-            <div class="col-md-2">Bankroll: </div><div class="col-md-4"><input onchange="UpdateBetSizes()" type='number' id="bankroll" value="{{bankroll}}" /></div>
-        </div>
-        <div class="row">
-            <div class="col-md-2"><input type='submit' value='Save' onclick="saveSettings()" /></div><div class="col-md-4" style="display:none;" id="saved">Settings have been saved.</div>
+        <div id="KellyContainer">
+            <div class="row" style="margin-top:30px;">
+                <div class="col-md-2">Kelly Multiplier: </div><div class="col-md-4"><input onchange="UpdateBetSizes()" type='number' id="kelly" value="{{kelly}}" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">Bankroll: </div><div class="col-md-4"><input onchange="UpdateBetSizes()" type='number' id="bankroll" value="{{bankroll}}" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-2"><input type='submit' value='Save' onclick="saveSettings()" /></div><div class="col-md-4" style="display:none;" id="saved">Settings have been saved.</div>
+            </div>
         </div>
         {% block content %}{% endblock %}
         <hr />
@@ -51,6 +52,7 @@
     <script src="/static/scripts/jquery-1.10.2.js"></script>
     <script src="/static/scripts/bootstrap.js"></script>
     <script src="/static/scripts/respond.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
     {% block scripts %}{% endblock %}
     <script>
         function saveSettings() {
