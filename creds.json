@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "pitcher-duels",
+  "private_key_id": "69e5e43990eb2fefd91e343f385eceb51449efa4",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCyvCGF4VwgkM6s\nljJBatH1+3vlSGJqiTX+Nia3WhdDjCCKEcUCU4Wbjx54bzWt5OzWIk1K/5cqh98b\nrgPVWFKcK1088W3UwNlOvnBaimC1siA1EvcoN7yqPN814xf4M1pxhdpVYBdihSSS\nv6HkOc4P9WDYF+Hv+vPx90dxIuqMzyIrSk0PM+Q8S/eHMu2yLVy1VG47It5Kf6Tk\nxF33dbxiEOLK8rm2GBH7VJRXymeWAMA2raENBL3hpG8urTgQXxTDsXL+RXAlhI2d\nF1dXxHcWGEFC2Mj2R9EunODuGttkz/V9G4d+LBHLP7W9c5kXp08+M/L1zBGNio/e\nqYdYb6nhAgMBAAECggEAHGW4m8lQ9lmbhJ8+b9dVcZQZvLWR8WRIgFHBN/tn29MN\nLnKhTvvPLAaCrFba+/x1xpXfmu1d6qN4xrCQqlpkkaxwHWksbpOPUyv9tNzsfaHF\n7TjMrQaiApg2TJz+p3AdTBEcvdjNDlmiFHC++4BVpYJydxLgUl0YWhbUMnz+MA3K\njCgoxFlWyt3vPBTbWQOSyyvDkcIU92+Z2Noq0rClOe9ZuJZ+X9dV9uk6d5aiLZwq\n0hf0eAflCMsLSnFtIcpuBJk9vFf1LoIq1FUcPVS8FZxAUlHpK9Xsa/mT6iKJb4Kd\n8rdtRA46H+9VFxcCq7neBowYlPdY3HprWdWCse0jmQKBgQDsVAESephVFsWahM6P\nwEctRukwmv5FVZBvPBrWGcyQZgNw1wyQ5/46AWQyzzCkXK/1U83Llx4vvtLEfG6V\nFlk7MlJX3pBFquPw79oyOT4fT3gyMw+JIfrawKwEmZKzO8jN3CWXM8eLXNt6o0Qn\n0SJX2CtHVjtgrpqi+Bi3o/n0xQKBgQDBnNpMpqBf4BB1no8cdra6IFU33BE0vpX0\nwN3bfFz4Vw4a6HlB4v5l+mB1YP2Jo0vwQzgudiyl2CyrT6y66vyyREa4i3y6gO/3\nfy3DyQ2BbZd3vxPRgbCdbmVNSNrTM+foQCUOzVMgT1pb6ft5Uk6v3kFvmG/ipi+r\nGkw0MFPKbQKBgGZdQJWjeoYotfDnI53KeEoZU/pUuFyJ4mT8ENe6FwxY05a132CI\nzGqNnbwQWI5pA2JtKU/NJisiKaMoDrIPGxl0A4zB/5XdnpwHGGj2uHzRbEu6KDmK\n+WB1Yk0fxBZUh/b7K2Eh8YXg88RcIbJpeMm5/Y0JwfBv0NVUR0iMA0HNAoGAKqvT\nQQmIVxkfB41GpVNUunjdz03lTOakTikjvHgQVXt6VFvgPbE1uGwSTkxuFKO03OMz\nwqmw9WxLjAYnX5rizrdVjt7PQpugR7/z6i6pl1j8BRxL1eTrdAcctIfWEq5h8kIQ\n6M4//+L9WzyafAaz6PbnHR1Pq3hNETzehrIQBZECgYAEWGnDT0kIftoGKXDTZpUm\nvdlz35Bk5JeEbQMqQnT0fB5RJgh0zdsFKIrq0uIfcdoupC/+wxfLDovgexH+pyAo\nNXLT87DTqFp/6VwyU5FrzwQoajDMYD22n81k5WsxpEo43h5BX0GHZViauaV8y7kf\ng1SjcWU7BGy+b+PmqPAFiw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "pitcher-duels@pitcher-duels.iam.gserviceaccount.com",
+  "client_id": "105294719335759282815",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/pitcher-duels%40pitcher-duels.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
