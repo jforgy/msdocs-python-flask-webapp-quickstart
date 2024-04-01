@@ -122,7 +122,7 @@ def getData(bankroll, kelly):
     sh = gc.open('Pitcher Duels')
     wks = sh[0]                      
     games = wks.get_as_df()
-    if not game.empty:
+    if not games.empty:
       games['BetSize'] = games['BetSize'].apply(lambda x: int(bankroll) * .01 * float(kelly) * x)
       games['BetSize'] = games['BetSize'].apply('${:,.2f}'.format)    
       games['Bet_Name'] = games['Bet_Name'].str.split().str[-2:].str.join(' ')
